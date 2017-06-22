@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:/Users/lutz/Tools/of_v0.9.8_osx_release/apps/myApps/wavescape/wavescape.xcodeproj">
+      location = "self:">
    </FileRef>
 </Workspace>

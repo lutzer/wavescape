@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxAnimatableFloat.h"
 
 class ofApp : public ofBaseApp{
 
@@ -20,5 +21,11 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
+    
+        vector<double> landscape;
+    
+        ofEasyCam cam;
+    
+        ofxAnimatableFloat phasor;
 		
 };
