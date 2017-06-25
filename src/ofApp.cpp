@@ -1,6 +1,7 @@
 #include "ofApp.h"
 
 static const int LANDSCAPE_SIZE = 1024;
+static const int GRID_CELL_SIZE = 32;
 static const float Z_MULTIPLICATOR = 80.0;
 
 double getValue(vector<double> array, float x, float y) {
@@ -37,8 +38,13 @@ void ofApp::setup(){
     for (int i=0; i < landscape.size(); i++) {
         int x = i % LANDSCAPE_SIZE;
         int y = i / LANDSCAPE_SIZE;
+
+        if (x % GRID_CELL_SIZE != 0 && y % GRID_CELL_SIZE != 0)
+            continue;
+
         landscapeMesh.addVertex(ofVec3f(x, y, landscape[i] * Z_MULTIPLICATOR));
     }
+
     landscapeMesh.setMode(ofPrimitiveMode::OF_PRIMITIVE_POINTS);
 
     //setup camera
@@ -63,7 +69,7 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-    ofBackground(0);
+    ofBackground(255);
 
     
     // Draw 3d scene.
