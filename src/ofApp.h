@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ofMain.h"
-#include "ofxAnimatableFloat.h"
 
 class ofApp : public ofBaseApp{
 
@@ -21,11 +20,22 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
+        void audioOut(float * input, int bufferSize, int nChannels);
     
-        vector<double> landscape;
-    
+        vector<float> landscape;
+
+        /* VISUAL OBJECTS */
+        ofMesh landscapeMesh;
         ofEasyCam cam;
-    
-        ofxAnimatableFloat phasor;
-		
+
+        /* SOUND OBJECTS */
+        ofSoundStream soundStream;
+        int		sampleRate;
+        float 	volume;
+        float phase;
+        float targetFrequency;
+
+        vector <float> lAudio;
+        vector <float> rAudio;
+
 };
