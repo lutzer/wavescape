@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxGui.h"
 
 class ofApp : public ofBaseApp{
 
@@ -28,12 +29,14 @@ class ofApp : public ofBaseApp{
         ofMesh landscapeMesh;
         ofEasyCam cam;
 
+        ofxPanel gui;
+        ofxFloatSlider frequency;
+
         /* SOUND OBJECTS */
         ofSoundStream soundStream;
         int		sampleRate;
         float 	volume;
         float phase;
-        float targetFrequency;
 
         vector <float> lAudio;
         vector <float> rAudio;

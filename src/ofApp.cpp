@@ -13,7 +13,7 @@ void ofApp::setup(){
     
     landscape = vector<float>(LANDSCAPE_SIZE*LANDSCAPE_SIZE);
     
-    //create wave landscape with a base frequency of bufferSize / sampleRate = 43 Hz
+    //create wave landscape
     for (int x=0; x < LANDSCAPE_SIZE; x++) {
         for (int y=0; y < LANDSCAPE_SIZE; y++) {
             landscape[x + y * LANDSCAPE_SIZE] = sin(x / (double)LANDSCAPE_SIZE * TWO_PI) *
@@ -25,7 +25,6 @@ void ofApp::setup(){
     int bufferSize = 256;
     sampleRate = 44100;
     volume = 1.0f;
-    targetFrequency = 1.0;
 
     soundStream.printDeviceList();
     //soundStream.setDeviceID(0)
@@ -46,6 +45,10 @@ void ofApp::setup(){
     ofPoint center(LANDSCAPE_SIZE/2,LANDSCAPE_SIZE/2, 0);
     cam.setTarget(center);
     cam.setDistance(2000);
+
+    //setup gui
+    gui.setup();
+    gui.add(frequency.setup("frequency", 40, 1, 1000));
     
 }
 
@@ -72,12 +75,13 @@ void ofApp::draw(){
 
     ofDrawAxis(LANDSCAPE_SIZE);
 
-    ofSetColor(255,0,0,120);
-    ofDrawSphere(phase * LANDSCAPE_SIZE, 0, 0, 20.0);
+    ofSetColor(255,0,0,255);
+    ofDrawSphere(phase * LANDSCAPE_SIZE, 0, 0, 10.0);
     
     cam.end();
     ofDisableDepthTest();
-    
+
+    gui.draw();
     
 }
 
@@ -143,7 +147,7 @@ void ofApp::audioOut(float * output, int bufferSize, int nChannels){
         phase -= 1.0;
     }
 
-    double phaseStep = (targetFrequency / sampleRate);
+    double phaseStep = (frequency / sampleRate);
 
     for (int i = 0; i < bufferSize; i++){
 
