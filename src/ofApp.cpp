@@ -44,11 +44,11 @@ void ofApp::setup(){
 
         landscapeMesh.addVertex(ofVec3f(x, y, landscape[i] * Z_MULTIPLICATOR));
     }
-
     landscapeMesh.setMode(ofPrimitiveMode::OF_PRIMITIVE_POINTS);
 
     //setup camera
     ofPoint center(LANDSCAPE_SIZE/2,LANDSCAPE_SIZE/2, 0);
+    cam.setPosition(center + ofVec3f(0, 0, 1000));
     cam.setTarget(center);
     cam.setDistance(2000);
 
@@ -148,10 +148,6 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 //--------------------------------------------------------------
 void ofApp::audioOut(float * output, int bufferSize, int nChannels){
-
-    while (phase >= 1.0){
-        phase -= 1.0;
-    }
 
     double phaseStep = (frequency / sampleRate);
 
