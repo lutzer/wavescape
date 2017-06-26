@@ -12,6 +12,18 @@ double getValue(vector<double> array, float x, float y) {
 //--------------------------------------------------------------
 void ofApp::setup(){
     
+    //setup audio
+    int bufferSize = 256;
+    sampleRate = 44100;
+    volume = 1.0f;
+    
+    soundStream.printDeviceList();
+    soundStream.setDeviceID(2);
+    soundStream.setup(this, 2, 0, sampleRate, bufferSize, 4);
+    
+    lAudio.assign(bufferSize, 0.0);
+    rAudio.assign(bufferSize, 0.0);
+    
     landscape = vector<float>(LANDSCAPE_SIZE*LANDSCAPE_SIZE);
     
     //create wave landscape
@@ -22,30 +34,6 @@ void ofApp::setup(){
         }
     }
 
-    //setup audio
-    int bufferSize = 256;
-    sampleRate = 44100;
-    volume = 1.0f;
-
-    soundStream.printDeviceList();
-    soundStream.setDeviceID(2);
-    soundStream.setup(this, 2, 0, sampleRate, bufferSize, 4);
-
-    lAudio.assign(bufferSize, 0.0);
-    rAudio.assign(bufferSize, 0.0);
-
-    //create landscape mesh
-    for (int i=0; i < landscape.size(); i++) {
-        int x = i % LANDSCAPE_SIZE;
-        int y = i / LANDSCAPE_SIZE;
-
-        if (x % GRID_CELL_SIZE != 0 && y % GRID_CELL_SIZE != 0)
-            continue;
-
-        landscapeMesh.addVertex(ofVec3f(x, y, landscape[i] * Z_MULTIPLICATOR));
-    }
-    landscapeMesh.setMode(ofPrimitiveMode::OF_PRIMITIVE_POINTS);
-
     //setup camera
     ofPoint center(LANDSCAPE_SIZE/2,LANDSCAPE_SIZE/2, 0);
     cam.setPosition(center + ofVec3f(0, 0, 1000));
@@ -54,7 +42,20 @@ void ofApp::setup(){
 
     //setup gui
     gui.setup();
+    gui.setHeaderBackgroundColor(ofColor::lightGray);
     gui.add(frequency.setup("frequency", 40, 1, 1000));
+    
+    //create landscape mesh
+    landscapeMesh.setMode(ofPrimitiveMode::OF_PRIMITIVE_POINTS);
+    for (int i=0; i < landscape.size(); i++) {
+        int x = i % LANDSCAPE_SIZE;
+        int y = i / LANDSCAPE_SIZE;
+        
+        if (x % GRID_CELL_SIZE != 0 && y % GRID_CELL_SIZE != 0)
+            continue;
+        
+        landscapeMesh.addVertex(ofVec3f(x, y, landscape[i] * Z_MULTIPLICATOR));
+    }
     
 }
 
@@ -148,6 +149,8 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 //--------------------------------------------------------------
 void ofApp::audioOut(float * output, int bufferSize, int nChannels){
+    
+    
 
     double phaseStep = (frequency / sampleRate);
 
@@ -155,8 +158,8 @@ void ofApp::audioOut(float * output, int bufferSize, int nChannels){
 
         float sample = landscape[phase * LANDSCAPE_SIZE];
 
-        lAudio[i] = output[i*nChannels    ] = sample * volume;
-        rAudio[i] = output[i*nChannels + 1] = sample * volume;
+        /*lAudio[i] =*/ output[i*nChannels    ] = sample * volume;
+        /*rAudio[i] =*/ output[i*nChannels + 1] = sample * volume;
 
         phase = fmod(phase + phaseStep, 1.0);
     }
