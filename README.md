@@ -1,5 +1,7 @@
 # wavescape
 
+prototype of a wave landscape synthesizer
+
 ## setup
 
 - install ofxAnimatable addon
