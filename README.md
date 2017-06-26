@@ -1,6 +1,6 @@
 # wavescape
 
-prototype of a wave landscape synthesizer
+a wave landscape synthesizer prototype
 
 ## setup
 
