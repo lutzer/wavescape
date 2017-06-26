@@ -28,7 +28,7 @@ void ofApp::setup(){
     volume = 1.0f;
 
     soundStream.printDeviceList();
-    //soundStream.setDeviceID(0)
+    soundStream.setDeviceID(2);
     soundStream.setup(this, 2, 0, sampleRate, bufferSize, 4);
 
     lAudio.assign(bufferSize, 0.0);
