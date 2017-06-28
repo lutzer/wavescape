@@ -4,35 +4,40 @@ static const int LANDSCAPE_SIZE = 1024;
 static const int GRID_CELL_SIZE = 32;
 static const float Z_MULTIPLICATOR = 80.0;
 
-double getValue(vector<double> array, float x, float y) {
-    float size = LANDSCAPE_SIZE;
-    return array[int(x * size) + int(y * size) * LANDSCAPE_SIZE];
+float getSample(const vector<float> &array, float x, float y, int size) {
+
+    float ind = x * size;
+
+    // liner interpolate between two x values
+    float val1 = array[ind];
+    float val2 = array[(int)(ind + 1) % size];
+
+    return val1 + (val2 - val1) * fmod(ind,1.0);
 }
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    
+
+    //create wave landscape
+    landscape = vector<float>(LANDSCAPE_SIZE*LANDSCAPE_SIZE);
+    for (int x=0; x < LANDSCAPE_SIZE; x++) {
+        for (int y=0; y < LANDSCAPE_SIZE; y++) {
+            landscape[x + y * LANDSCAPE_SIZE] = sin(x / (double)LANDSCAPE_SIZE * TWO_PI) *
+            sin(y / (double)LANDSCAPE_SIZE * TWO_PI + M_PI_2);
+        }
+    }
+
     //setup audio
     int bufferSize = 256;
     sampleRate = 44100;
     volume = 1.0f;
     
     soundStream.printDeviceList();
-    soundStream.setDeviceID(2);
+    //soundStream.setDeviceID(2);
     soundStream.setup(this, 2, 0, sampleRate, bufferSize, 4);
     
     lAudio.assign(bufferSize, 0.0);
     rAudio.assign(bufferSize, 0.0);
-    
-    landscape = vector<float>(LANDSCAPE_SIZE*LANDSCAPE_SIZE);
-    
-    //create wave landscape
-    for (int x=0; x < LANDSCAPE_SIZE; x++) {
-        for (int y=0; y < LANDSCAPE_SIZE; y++) {
-            landscape[x + y * LANDSCAPE_SIZE] = sin(x / (double)LANDSCAPE_SIZE * TWO_PI) *
-                sin(y / (double)LANDSCAPE_SIZE * TWO_PI + M_PI_2);
-        }
-    }
 
     //setup camera
     ofPoint center(LANDSCAPE_SIZE/2,LANDSCAPE_SIZE/2, 0);
@@ -149,14 +154,13 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 //--------------------------------------------------------------
 void ofApp::audioOut(float * output, int bufferSize, int nChannels){
-    
-    
+
 
     double phaseStep = (frequency / sampleRate);
 
     for (int i = 0; i < bufferSize; i++){
 
-        float sample = landscape[phase * LANDSCAPE_SIZE];
+        float sample = getSample(landscape, phase, 0.0, LANDSCAPE_SIZE);
 
         /*lAudio[i] =*/ output[i*nChannels    ] = sample * volume;
         /*rAudio[i] =*/ output[i*nChannels + 1] = sample * volume;
