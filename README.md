@@ -2,8 +2,12 @@
 
 a wave landscape synthesizer prototype
 
-## setup
+## Setup
 
 - install ofxAnimatable addon
 - install jack from http://jackaudio.org/ to send soundstream from openframeworks to puredata
 - start *qjackctl* and run openframeworks and puredata patches, then route the 2 channels from of to pd.
+
+## Todo
+
+* [ ] Implement bilinear interpolation, see: https://en.wikipedia.org/wiki/Bilinear_interpolation#Unit_Square
