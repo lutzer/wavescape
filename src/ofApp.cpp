@@ -120,7 +120,7 @@ void ofApp::draw(){
     ofSetColor(120,120,120,120);
     landscapeMesh.draw();
 
-    ofDrawAxis(LANDSCAPE_SIZE);
+    //ofDrawAxis(LANDSCAPE_SIZE);
 
     ofSetColor(255,0,0,255);
     for (int i=0; i < PATH_SIZE; i++) {
