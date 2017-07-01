@@ -10,4 +10,6 @@ a wave landscape synthesizer prototype
 
 ## Todo
 
-* [ ] Implement bilinear interpolation, see: https://en.wikipedia.org/wiki/Bilinear_interpolation#Unit_Square
+* [x] Implement bilinear interpolation, see: https://en.wikipedia.org/wiki/Bilinear_interpolation#Unit_Square
+* [ ] Fix hypocloid function https://en.wikipedia.org/wiki/Hypocycloid
+

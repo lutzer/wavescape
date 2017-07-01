@@ -39,6 +39,13 @@ float getSample(const vector<float> &array, float x, float y, int size, bool wra
     return v00 * (1 - xrem) * (1 - yrem) + v01 * xrem * (1 - yrem) + v10 * (1 - xrem) * yrem + v11 * xrem * yrem;
 }
 
+ofVec2f hypocycloid(float angle, float k, float r) {
+    return ofVec2f(
+        r * (k - 1) * cos(angle) + r * cos((k - 1) * angle),
+        r * (k - 1) * sin(angle) + r * sin((k - 1) * angle)
+    );
+}
+
 //--------------------------------------------------------------
 void ofApp::setup(){
 
@@ -46,7 +53,9 @@ void ofApp::setup(){
     landscape = vector<float>(LANDSCAPE_SIZE*LANDSCAPE_SIZE);
     for (int x=0; x < LANDSCAPE_SIZE; x++) {
         for (int y=0; y < LANDSCAPE_SIZE; y++) {
-            landscape[x + y * LANDSCAPE_SIZE] = sin(x / (double)LANDSCAPE_SIZE * TWO_PI) *
+            landscape[x + y * LANDSCAPE_SIZE] =
+            sin(x / (double)LANDSCAPE_SIZE * TWO_PI) *
+            //fmod(y * 2.0 / (double)LANDSCAPE_SIZE, 1.0);
             sin(y * 2 / (double)LANDSCAPE_SIZE * TWO_PI + M_PI_2 );
         }
     }
@@ -77,6 +86,8 @@ void ofApp::setup(){
     gui.setup();
     gui.setHeaderBackgroundColor(ofColor::lightGray);
     gui.add(frequency.setup("frequency", 40, 1, 1000));
+    gui.add(radius.setup("path_radius", 0.25, 0.01, 0.25));
+    gui.add(cusps.setup("path_cusps", -1, -10, 10));
     
     //create landscape mesh
     landscapeMesh.setMode(ofPrimitiveMode::OF_PRIMITIVE_POINTS);
@@ -187,13 +198,19 @@ void ofApp::audioOut(float * output, int bufferSize, int nChannels){
 
     for (int i = 0; i < bufferSize; i++){
 
-        float x = sin(phase * M_PI * 2) * 0.45 + 0.5;
-        float y = cos(phase * M_PI * 2) * 0.45 + 0.5;
+        //float x = sin(phase * M_PI * 2) * 0.45 + 0.5;
+        //float y = cos(phase * M_PI * 2) * 0.45 + 0.5;
 
-        float sample = getSample(landscape, x, y, LANDSCAPE_SIZE, false);
+        ofVec2f p = hypocycloid(phase * PI * 2, cusps, radius) * 0.5;
+        p += ofVec2f(0.5,0.5);
 
-        path[pathIndex] = ofVec3f(x * LANDSCAPE_SIZE, y * LANDSCAPE_SIZE, 0);
+        path[pathIndex] = ofVec3f(p.x * LANDSCAPE_SIZE, p.y * LANDSCAPE_SIZE, 0);
         pathIndex = (pathIndex + 1) % PATH_SIZE;
+
+        p.x = fmod(p.x,1.0);
+        p.y = fmod(p.y,1.0);
+
+        float sample = getSample(landscape, p.x, p.y, LANDSCAPE_SIZE, false);
 
         /*lAudio[i] =*/ output[i*nChannels    ] = sample * volume;
         /*rAudio[i] =*/ output[i*nChannels + 1] = sample * volume;
