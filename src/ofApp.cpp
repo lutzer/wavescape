@@ -4,15 +4,38 @@ static const int LANDSCAPE_SIZE = 1024;
 static const int GRID_CELL_SIZE = 32;
 static const float Z_MULTIPLICATOR = 80.0;
 
-float getSample(const vector<float> &array, float x, float y, int size) {
+// gets a sample from a cubic array,
+// wrap parameters defines if the matrix wraps at the edges or extends the edge values
+float getSample(const vector<float> &array, float x, float y, int size, bool wrap) {
 
-    float ind = x * size;
+    int i = x * size;
+    int j = y * size;
 
-    // liner interpolate between two x values
-    float val1 = array[ind];
-    float val2 = array[(int)(ind + 1) % size];
+    int iplus,jplus;
 
-    return val1 + (val2 - val1) * fmod(ind,1.0);
+    if ((i+1) < size && (j+1) < size) {
+        iplus = i + 1;
+        jplus = j + 1;
+    } else if ((i+1) < size) {
+        iplus = i + 1;
+        jplus = wrap ? 0 : j;
+    } else {
+        iplus = wrap ? 0 : i;
+        jplus = j + 1;
+    }
+
+    // get 4 sruounding values
+    float v00 = array[i + j * size];
+    float v01 = array[iplus + j * size];
+    float v10 = array[i + jplus * size];
+    float v11 = array[iplus + jplus * size];
+
+    // get x and y remainders
+    float xrem = fmod(x*size, 1.0);
+    float yrem = fmod(y*size, 1.0);
+
+    // bilinear interpolate between the 4 values
+    return v00 * (1 - xrem) * (1 - yrem) + v01 * xrem * (1 - yrem) + v10 * (1 - xrem) * yrem + v11 * xrem * yrem;
 }
 
 //--------------------------------------------------------------
@@ -160,7 +183,7 @@ void ofApp::audioOut(float * output, int bufferSize, int nChannels){
 
     for (int i = 0; i < bufferSize; i++){
 
-        float sample = getSample(landscape, phase, 0.0, LANDSCAPE_SIZE);
+        float sample = getSample(landscape, phase, 0.0, LANDSCAPE_SIZE, true);
 
         /*lAudio[i] =*/ output[i*nChannels    ] = sample * volume;
         /*rAudio[i] =*/ output[i*nChannels + 1] = sample * volume;
