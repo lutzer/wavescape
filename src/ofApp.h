@@ -29,6 +29,9 @@ class ofApp : public ofBaseApp{
         ofMesh landscapeMesh;
         ofEasyCam cam;
 
+        ofVec3f* path;
+        int pathIndex;
+
         ofxPanel gui;
         ofxFloatSlider frequency;
 

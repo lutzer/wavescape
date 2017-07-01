@@ -3,6 +3,7 @@
 static const int LANDSCAPE_SIZE = 1024;
 static const int GRID_CELL_SIZE = 32;
 static const float Z_MULTIPLICATOR = 80.0;
+static const int PATH_SIZE = 128;
 
 // gets a sample from a cubic array,
 // wrap parameters defines if the matrix wraps at the edges or extends the edge values
@@ -46,9 +47,13 @@ void ofApp::setup(){
     for (int x=0; x < LANDSCAPE_SIZE; x++) {
         for (int y=0; y < LANDSCAPE_SIZE; y++) {
             landscape[x + y * LANDSCAPE_SIZE] = sin(x / (double)LANDSCAPE_SIZE * TWO_PI) *
-            sin(y / (double)LANDSCAPE_SIZE * TWO_PI + M_PI_2);
+            sin(y * 2 / (double)LANDSCAPE_SIZE * TWO_PI + M_PI_2 );
         }
     }
+
+    // initialize path
+    path = new ofVec3f[PATH_SIZE];
+    pathIndex = 0;
 
     //setup audio
     int bufferSize = 256;
@@ -90,10 +95,6 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
     
-    //float dt = ofGetElapsedTimef();
-    
-    
-    
 }
 
 //--------------------------------------------------------------
@@ -111,7 +112,10 @@ void ofApp::draw(){
     ofDrawAxis(LANDSCAPE_SIZE);
 
     ofSetColor(255,0,0,255);
-    ofDrawSphere(phase * LANDSCAPE_SIZE, 0, 0, 10.0);
+    for (int i=0; i < PATH_SIZE; i++) {
+        ofDrawSphere(path[i], 5.0);
+    }
+
     
     cam.end();
     ofDisableDepthTest();
@@ -183,7 +187,13 @@ void ofApp::audioOut(float * output, int bufferSize, int nChannels){
 
     for (int i = 0; i < bufferSize; i++){
 
-        float sample = getSample(landscape, phase, 0.0, LANDSCAPE_SIZE, true);
+        float x = sin(phase * M_PI * 2) * 0.45 + 0.5;
+        float y = cos(phase * M_PI * 2) * 0.45 + 0.5;
+
+        float sample = getSample(landscape, x, y, LANDSCAPE_SIZE, false);
+
+        path[pathIndex] = ofVec3f(x * LANDSCAPE_SIZE, y * LANDSCAPE_SIZE, 0);
+        pathIndex = (pathIndex + 1) % PATH_SIZE;
 
         /*lAudio[i] =*/ output[i*nChannels    ] = sample * volume;
         /*rAudio[i] =*/ output[i*nChannels + 1] = sample * volume;
