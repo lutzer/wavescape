@@ -3,7 +3,12 @@
 static const int LANDSCAPE_SIZE = 1024;
 static const int GRID_CELL_SIZE = 32;
 static const float Z_MULTIPLICATOR = 80.0;
-static const int PATH_SIZE = 128;
+static const int PATH_SIZE = 256;
+static const float MAX_CUSPS = 10.0;
+
+int sgn(float val) {
+    return (val < 0) ? -1 : 1;
+}
 
 // gets a sample from a cubic array,
 // wrap parameters defines if the matrix wraps at the edges or extends the edge values
@@ -40,9 +45,19 @@ float getSample(const vector<float> &array, float x, float y, int size, bool wra
 }
 
 ofVec2f hypocycloid(float angle, float k, float r) {
+
+    if (k > 1)
+        r = r / k;
+    else if (k > 0)
+        r = r * k;
+    else if (k > -1)
+        r = r * k * (1+k);
+    else
+        r = r / (k-2);
+
     return ofVec2f(
-        r * (k - 1) * cos(angle) + r * cos((k - 1) * angle),
-        r * (k - 1) * sin(angle) + r * sin((k - 1) * angle)
+        r * ((k - 1) * cos(angle) + cos((k - 1) * angle)),
+        r * ((k - 1) * sin(angle) - sin((k - 1) * angle))
     );
 }
 
@@ -86,8 +101,8 @@ void ofApp::setup(){
     gui.setup();
     gui.setHeaderBackgroundColor(ofColor::lightGray);
     gui.add(frequency.setup("frequency", 40, 1, 1000));
-    gui.add(radius.setup("path_radius", 0.25, 0.01, 0.25));
-    gui.add(cusps.setup("path_cusps", -1, -10, 10));
+    gui.add(radius.setup("path_radius", 0.5, 0.01, 1.00));
+    gui.add(cusps.setup("path_cusps", 3, -MAX_CUSPS, MAX_CUSPS));
     
     //create landscape mesh
     landscapeMesh.setMode(ofPrimitiveMode::OF_PRIMITIVE_POINTS);
@@ -198,9 +213,6 @@ void ofApp::audioOut(float * output, int bufferSize, int nChannels){
 
     for (int i = 0; i < bufferSize; i++){
 
-        //float x = sin(phase * M_PI * 2) * 0.45 + 0.5;
-        //float y = cos(phase * M_PI * 2) * 0.45 + 0.5;
-
         ofVec2f p = hypocycloid(phase * PI * 2, cusps, radius) * 0.5;
         p += ofVec2f(0.5,0.5);
 
@@ -215,7 +227,7 @@ void ofApp::audioOut(float * output, int bufferSize, int nChannels){
         /*lAudio[i] =*/ output[i*nChannels    ] = sample * volume;
         /*rAudio[i] =*/ output[i*nChannels + 1] = sample * volume;
 
-        phase = fmod(phase + phaseStep, 1.0);
+        phase = fmod(phase + phaseStep, MAX_CUSPS);
     }
     
 }
