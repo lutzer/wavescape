@@ -36,6 +36,7 @@ class ofApp : public ofBaseApp{
         ofxFloatSlider frequency;
         ofxFloatSlider radius;
         ofxFloatSlider cusps;
+        ofxFloatSlider rotation;
 
         /* SOUND OBJECTS */
         ofSoundStream soundStream;

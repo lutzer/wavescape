@@ -71,7 +71,7 @@ void ofApp::setup(){
             landscape[x + y * LANDSCAPE_SIZE] =
             sin(x / (double)LANDSCAPE_SIZE * TWO_PI) *
             //fmod(y * 2.0 / (double)LANDSCAPE_SIZE, 1.0);
-            sin(y * 2 / (double)LANDSCAPE_SIZE * TWO_PI + M_PI_2 );
+            sin(y / (double)LANDSCAPE_SIZE * TWO_PI + M_PI_2 * 3 );
         }
     }
 
@@ -103,6 +103,7 @@ void ofApp::setup(){
     gui.add(frequency.setup("frequency", 40, 1, 1000));
     gui.add(radius.setup("path_radius", 0.5, 0.01, 1.00));
     gui.add(cusps.setup("path_cusps", 3, -MAX_CUSPS, MAX_CUSPS));
+    gui.add(rotation.setup("rotation", 0, 0, 180));
     
     //create landscape mesh
     landscapeMesh.setMode(ofPrimitiveMode::OF_PRIMITIVE_POINTS);
@@ -214,6 +215,10 @@ void ofApp::audioOut(float * output, int bufferSize, int nChannels){
     for (int i = 0; i < bufferSize; i++){
 
         ofVec2f p = hypocycloid(phase * PI * 2, cusps, radius) * 0.5;
+
+        //rotate
+        p.rotate(rotation);
+
         p += ofVec2f(0.5,0.5);
 
         path[pathIndex] = ofVec3f(p.x * LANDSCAPE_SIZE, p.y * LANDSCAPE_SIZE, 0);
