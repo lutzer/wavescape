@@ -5,6 +5,7 @@ static const int GRID_CELL_SIZE = 32;
 static const float Z_MULTIPLICATOR = 80.0;
 static const int PATH_SIZE = 256;
 static const float MAX_CUSPS = 10.0;
+static const float POINT_RADIUS = 1.0;
 
 int sgn(float val) {
     return (val < 0) ? -1 : 1;
@@ -64,14 +65,24 @@ ofVec2f hypocycloid(float angle, float k, float r) {
 //--------------------------------------------------------------
 void ofApp::setup(){
 
-    //create wave landscape
-    landscape = vector<float>(LANDSCAPE_SIZE*LANDSCAPE_SIZE);
+    //create sin landscape
+    landscape1 = vector<float>(LANDSCAPE_SIZE*LANDSCAPE_SIZE);
     for (int x=0; x < LANDSCAPE_SIZE; x++) {
         for (int y=0; y < LANDSCAPE_SIZE; y++) {
-            landscape[x + y * LANDSCAPE_SIZE] =
+            landscape1[x + y * LANDSCAPE_SIZE] =
             sin(x / (double)LANDSCAPE_SIZE * TWO_PI) *
             //fmod(y * 2.0 / (double)LANDSCAPE_SIZE, 1.0);
-            sin(y / (double)LANDSCAPE_SIZE * TWO_PI + M_PI_2 * 3 );
+            sin(y / (double)LANDSCAPE_SIZE * TWO_PI + M_PI_2 * 4 );
+        }
+    }
+
+    //create saw wave landscape
+    landscape2 = vector<float>(LANDSCAPE_SIZE*LANDSCAPE_SIZE);
+    for (int x=0; x < LANDSCAPE_SIZE; x++) {
+        for (int y=0; y < LANDSCAPE_SIZE; y++) {
+            landscape2[x + y * LANDSCAPE_SIZE] =
+            fmod(x * 2.0 / (double)LANDSCAPE_SIZE, 1.0) *
+            fmod(y * 4.0 / (double)LANDSCAPE_SIZE, 1.0);
         }
     }
 
@@ -104,17 +115,18 @@ void ofApp::setup(){
     gui.add(radius.setup("path_radius", 0.5, 0.01, 1.00));
     gui.add(cusps.setup("path_cusps", 3, -MAX_CUSPS, MAX_CUSPS));
     gui.add(rotation.setup("rotation", 0, 0, 180));
+    gui.add(transition.setup("transition", 0, 0, 1));
     
     //create landscape mesh
     landscapeMesh.setMode(ofPrimitiveMode::OF_PRIMITIVE_POINTS);
-    for (int i=0; i < landscape.size(); i++) {
+    for (int i=0; i < landscape1.size(); i++) {
         int x = i % LANDSCAPE_SIZE;
         int y = i / LANDSCAPE_SIZE;
         
         if (x % GRID_CELL_SIZE != 0 && y % GRID_CELL_SIZE != 0)
             continue;
         
-        landscapeMesh.addVertex(ofVec3f(x, y, landscape[i] * Z_MULTIPLICATOR));
+        landscapeMesh.addVertex(ofVec3f(x, y, landscape1[i] * Z_MULTIPLICATOR));
     }
     
 }
@@ -134,6 +146,10 @@ void ofApp::draw(){
     cam.begin();
 
     ofSetColor(120,120,120,120);
+//    vector<ofVec3f> vertices = landscape1Mesh.getVertices();
+//    for (auto point : vertices) {
+//        ofDrawSphere(point, POINT_RADIUS);
+//    }
     landscapeMesh.draw();
 
     //ofDrawAxis(LANDSCAPE_SIZE);
@@ -227,7 +243,10 @@ void ofApp::audioOut(float * output, int bufferSize, int nChannels){
         p.x = fmod(p.x,1.0);
         p.y = fmod(p.y,1.0);
 
-        float sample = getSample(landscape, p.x, p.y, LANDSCAPE_SIZE, false);
+        float sample1 = getSample(landscape1, p.x, p.y, LANDSCAPE_SIZE, false);
+        float sample2 = getSample(landscape2, p.x, p.y, LANDSCAPE_SIZE, false);
+
+        float sample = sample1 * (1-transition) + sample2 * transition;
 
         /*lAudio[i] =*/ output[i*nChannels    ] = sample * volume;
         /*rAudio[i] =*/ output[i*nChannels + 1] = sample * volume;

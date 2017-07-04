@@ -23,7 +23,8 @@ class ofApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
         void audioOut(float * input, int bufferSize, int nChannels);
     
-        vector<float> landscape;
+        vector<float> landscape1;
+        vector<float> landscape2;
 
         /* VISUAL OBJECTS */
         ofMesh landscapeMesh;
@@ -37,6 +38,7 @@ class ofApp : public ofBaseApp{
         ofxFloatSlider radius;
         ofxFloatSlider cusps;
         ofxFloatSlider rotation;
+        ofxFloatSlider transition;
 
         /* SOUND OBJECTS */
         ofSoundStream soundStream;
