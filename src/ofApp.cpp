@@ -70,9 +70,9 @@ void ofApp::setup(){
     for (int x=0; x < LANDSCAPE_SIZE; x++) {
         for (int y=0; y < LANDSCAPE_SIZE; y++) {
             landscape1[x + y * LANDSCAPE_SIZE] =
-            sin(x / (double)LANDSCAPE_SIZE * TWO_PI) *
+            sin(x / (double)LANDSCAPE_SIZE * TWO_PI + M_PI_2) *
             //fmod(y * 2.0 / (double)LANDSCAPE_SIZE, 1.0);
-            sin(y / (double)LANDSCAPE_SIZE * TWO_PI + M_PI_2 * 4 );
+            sin(y * 2 / (double)LANDSCAPE_SIZE * TWO_PI + M_PI_2);
         }
     }
 
@@ -81,8 +81,8 @@ void ofApp::setup(){
     for (int x=0; x < LANDSCAPE_SIZE; x++) {
         for (int y=0; y < LANDSCAPE_SIZE; y++) {
             landscape2[x + y * LANDSCAPE_SIZE] =
-            fmod(x * 2.0 / (double)LANDSCAPE_SIZE, 1.0) *
-            fmod(y * 4.0 / (double)LANDSCAPE_SIZE, 1.0);
+            fmod(x * 1.0 / (double)LANDSCAPE_SIZE + 0.5, 1.0) *
+            fmod(y * 2.0 / (double)LANDSCAPE_SIZE + 0.5, 1.0);
         }
     }
 
@@ -116,24 +116,38 @@ void ofApp::setup(){
     gui.add(cusps.setup("path_cusps", 3, -MAX_CUSPS, MAX_CUSPS));
     gui.add(rotation.setup("rotation", 0, 0, 180));
     gui.add(transition.setup("transition", 0, 0, 1));
-    
-    //create landscape mesh
-    landscapeMesh.setMode(ofPrimitiveMode::OF_PRIMITIVE_POINTS);
-    for (int i=0; i < landscape1.size(); i++) {
-        int x = i % LANDSCAPE_SIZE;
-        int y = i / LANDSCAPE_SIZE;
-        
-        if (x % GRID_CELL_SIZE != 0 && y % GRID_CELL_SIZE != 0)
-            continue;
-        
-        landscapeMesh.addVertex(ofVec3f(x, y, landscape1[i] * Z_MULTIPLICATOR));
-    }
+
+
+    //landscapeMesh.setMode(ofPrimitiveMode::OF_PRIMITIVE_POINTS);
+
     
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    
+
+    //update landscape mesh
+    landscapeMesh.clear();
+    int meshIndex = 0;
+    int size = LANDSCAPE_SIZE / GRID_CELL_SIZE;
+    for (int i=0; i < landscape1.size(); i++) {
+        int x = i % LANDSCAPE_SIZE;
+        int y = i / LANDSCAPE_SIZE;
+
+        if (x % GRID_CELL_SIZE != 0 || y % GRID_CELL_SIZE != 0)
+            continue;
+
+        float value = landscape1[i] * (1-transition) + landscape2[i] * transition;
+
+        landscapeMesh.addVertex(ofVec3f(x, y, value * Z_MULTIPLICATOR));
+
+        if (meshIndex > size && meshIndex % size != 0) {
+                landscapeMesh.addTriangle(meshIndex - size, meshIndex - 1, meshIndex);
+                landscapeMesh.addTriangle(meshIndex - size - 1, meshIndex - size, meshIndex - 1);
+        }
+        meshIndex++;
+    }
+
 }
 
 //--------------------------------------------------------------
@@ -150,7 +164,7 @@ void ofApp::draw(){
 //    for (auto point : vertices) {
 //        ofDrawSphere(point, POINT_RADIUS);
 //    }
-    landscapeMesh.draw();
+    landscapeMesh.drawWireframe();
 
     //ofDrawAxis(LANDSCAPE_SIZE);
 
@@ -251,6 +265,7 @@ void ofApp::audioOut(float * output, int bufferSize, int nChannels){
         /*lAudio[i] =*/ output[i*nChannels    ] = sample * volume;
         /*rAudio[i] =*/ output[i*nChannels + 1] = sample * volume;
 
+        //phase = fmod(phase + phaseStep, MAX_CUSPS);
         phase = fmod(phase + phaseStep, MAX_CUSPS);
     }
     
